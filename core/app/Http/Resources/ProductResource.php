@@ -34,6 +34,10 @@ class ProductResource extends JsonResource
             // Media
             'thumbnail_url' => $this->imageUrl($this->thumbnail_image),
             'image_urls'    => $this->imageUrls($this->images),
+            'front_view_url' => $this->imageUrl($this->front_view),
+            'back_view_url' => $this->imageUrl($this->back_view),
+            'side_view_url' => $this->imageUrl($this->side_view),
+            '3d_active' => (bool) $this->{"3d_active"},
 
             // Relations (stay omitted unless eager loaded)
             'category' => $this->whenLoaded('category', fn () => new CategoryResource($this->category)),

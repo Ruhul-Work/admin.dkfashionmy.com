@@ -122,4 +122,16 @@ class ProductController extends Controller
 
 
 
+
+    public function threeDActive()
+    {
+        $products = Product::with('category')
+            ->where('shopee_visibility', 1)
+            ->whereNull('parent_id')
+            ->where('3d_active', 1)
+            ->limit(10)
+            ->get();
+
+        return response()->json(['success' => true, 'data' => ProductResource::collection($products)]);
+    }
 }

@@ -373,6 +373,47 @@
                                         </div>
                                     </div>
 
+                                        <div class="col-12 mt-3">
+                                            <div class="my-3 fw-semibold">3D Image Fields</div>
+                                        </div>
+
+                                        <div class="col-lg-3 col-sm-6 col-12">
+                                            <div class="mb-3">
+                                                <label class="form-label">Front View</label>
+                                                <div class="form-group">
+                                                    <div class="row" id="front_view"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-3 col-sm-6 col-12">
+                                            <div class="mb-3">
+                                                <label class="form-label">Back View</label>
+                                                <div class="form-group">
+                                                    <div class="row" id="back_view"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-3 col-sm-6 col-12">
+                                            <div class="mb-3">
+                                                <label class="form-label">Side View</label>
+                                                <div class="form-group">
+                                                    <div class="row" id="side_view"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-3 col-sm-6 col-12">
+                                            <label class="form-label text-sm mb-8">3D Active?</label>
+                                            <div class="form-switch switch-purple d-flex align-items-center gap-3">
+                                                <input type="hidden" name="3d_active" value="0">
+                                                <input class="form-check-input" type="checkbox" name="3d_active"
+                                                    value="1" id="threedActive" checked>
+                                                <label class="form-check-label" for="threedActive">Enable 3D view</label>
+                                            </div>
+                                        </div>
+
                                         <div class="row">
                                             <div class="col-12 mb-8">
                                                 <label class="form-label text-sm mb-8">Active?</label>
@@ -1228,6 +1269,57 @@
 
         $("#size_chart_image").spartanMultiImagePicker({
             fieldName: 'size_chart_image',
+            maxCount: 1,
+            rowHeight: '200px',
+            groupClassName: 'col',
+            maxFileSize: PRODUCT_IMAGE_MAX_BYTES,
+            dropFileLabel: "Drop Here",
+            onExtensionErr: function(index, file) {
+                console.log(index, file, 'extension err');
+                alert('Please only input png or jpg type file')
+            },
+            onSizeErr: function(index, file) {
+                console.log(index, file, 'file size too big');
+                alert('File size is too big. Maximum allowed size is 2 MB.');
+            }
+        });
+
+        $("#front_view").spartanMultiImagePicker({
+            fieldName: 'front_view',
+            maxCount: 1,
+            rowHeight: '200px',
+            groupClassName: 'col',
+            maxFileSize: PRODUCT_IMAGE_MAX_BYTES,
+            dropFileLabel: "Drop Here",
+            onExtensionErr: function(index, file) {
+                console.log(index, file, 'extension err');
+                alert('Please only input png or jpg type file')
+            },
+            onSizeErr: function(index, file) {
+                console.log(index, file, 'file size too big');
+                alert('File size is too big. Maximum allowed size is 2 MB.');
+            }
+        });
+
+        $("#back_view").spartanMultiImagePicker({
+            fieldName: 'back_view',
+            maxCount: 1,
+            rowHeight: '200px',
+            groupClassName: 'col',
+            maxFileSize: PRODUCT_IMAGE_MAX_BYTES,
+            dropFileLabel: "Drop Here",
+            onExtensionErr: function(index, file) {
+                console.log(index, file, 'extension err');
+                alert('Please only input png or jpg type file')
+            },
+            onSizeErr: function(index, file) {
+                console.log(index, file, 'file size too big');
+                alert('File size is too big. Maximum allowed size is 2 MB.');
+            }
+        });
+
+        $("#side_view").spartanMultiImagePicker({
+            fieldName: 'side_view',
             maxCount: 1,
             rowHeight: '200px',
             groupClassName: 'col',

@@ -379,6 +379,10 @@ class ProductController extends Controller
                 'images.*'          => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'thumbnail_image'   => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'size_chart_image'  => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'front_view'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'back_view'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'side_view'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                '3d_active'         => ['nullable', 'integer', 'in:0,1'],
                 'meta_title'        => ['nullable', 'string', 'max:150'],
                 'meta_description'  => ['nullable', 'string', 'max:350'],
                 'meta_keywords'     => ['nullable', 'string', 'max:250'],
@@ -466,6 +470,19 @@ class ProductController extends Controller
             $metaImagePath = uploadImage($req->file('meta_image'), 'product/meta_images');
         }
 
+        $frontViewImage = null;
+        if ($req->hasFile('front_view')) {
+            $frontViewImage = uploadImage($req->file('front_view'), 'product/front_view');
+        }
+        $backViewImage = null;
+        if ($req->hasFile('back_view')) {
+            $backViewImage = uploadImage($req->file('back_view'), 'product/back_view');
+        }
+        $sideViewImage = null;
+        if ($req->hasFile('side_view')) {
+            $sideViewImage = uploadImage($req->file('side_view'), 'product/side_view');
+        }
+
         $shopeeMrp        = (($data['shopee_mrp'] ?? '') !== '') ? (float) $data['shopee_mrp'] : null;
         $shopeePrice      = (($data['shopee_price'] ?? '') !== '') ? (float) $data['shopee_price'] : null;
         $shopeeUrl        = (($data['shopee_url'] ?? '') !== '') ? trim($data['shopee_url']) : null;
@@ -501,6 +518,10 @@ class ProductController extends Controller
             'images'            => json_encode($imagePaths),
             'thumbnail_image'   => $thumbnail_image,
             'size_chart_image'  => $size_chart_image,
+            'front_view'        => $frontViewImage,
+            'back_view'         => $backViewImage,
+            'side_view'         => $sideViewImage,
+            '3d_active'         => (int) ($data['3d_active'] ?? 0),
             'meta_image'        => $metaImagePath,
             'shopee_mrp'        => $shopeeMrp,
             'shopee_price'      => $shopeePrice,
@@ -725,6 +746,10 @@ class ProductController extends Controller
                 'existing_images.*' => ['nullable', 'string'],
                 'thumbnail_image'   => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'size_chart_image'  => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'front_view'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'back_view'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'side_view'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                '3d_active'         => ['nullable', 'integer', 'in:0,1'],
                 'meta_title'        => ['nullable', 'string', 'max:150'],
                 'meta_description'  => ['nullable', 'string', 'max:350'],
                 'meta_keywords'     => ['nullable', 'string', 'max:250'],
@@ -820,6 +845,9 @@ class ProductController extends Controller
         $previousThumbnailImage = $product->thumbnail_image;
         $previousSizeImage      = $product->size_chart_image;
         $previousMetaImage      = $product->meta_image;
+        $previousFrontView      = $product->front_view;
+        $previousBackView       = $product->back_view;
+        $previousSideView       = $product->side_view;
 
         $existing_images = $data['existing_images'] ?? [];
         $uploaded_images = $req->file('image', []);
@@ -898,6 +926,48 @@ class ProductController extends Controller
             $product->size_chart_image = null;
         }
 
+        $frontViewPath = null;
+        if ($req->hasFile('front_view')) {
+            $frontViewPath      = uploadImage($req->file('front_view'), 'product/front_view');
+            $product->front_view = $frontViewPath;
+            if ($previousFrontView && file_exists($previousFrontView)) {
+                @unlink($previousFrontView);
+            }
+        } elseif ($req->remove_front_view == 1) {
+            if ($previousFrontView && file_exists($previousFrontView)) {
+                @unlink($previousFrontView);
+            }
+            $product->front_view = null;
+        }
+
+        $backViewPath = null;
+        if ($req->hasFile('back_view')) {
+            $backViewPath      = uploadImage($req->file('back_view'), 'product/back_view');
+            $product->back_view = $backViewPath;
+            if ($previousBackView && file_exists($previousBackView)) {
+                @unlink($previousBackView);
+            }
+        } elseif ($req->remove_back_view == 1) {
+            if ($previousBackView && file_exists($previousBackView)) {
+                @unlink($previousBackView);
+            }
+            $product->back_view = null;
+        }
+
+        $sideViewPath = null;
+        if ($req->hasFile('side_view')) {
+            $sideViewPath      = uploadImage($req->file('side_view'), 'product/side_view');
+            $product->side_view = $sideViewPath;
+            if ($previousSideView && file_exists($previousSideView)) {
+                @unlink($previousSideView);
+            }
+        } elseif ($req->remove_side_view == 1) {
+            if ($previousSideView && file_exists($previousSideView)) {
+                @unlink($previousSideView);
+            }
+            $product->side_view = null;
+        }
+
         $variantImagePath     = json_decode($product->images);
         $variantThumbnailPath = $product->thumbnail_image;
         $variantSizePath      = $product->size_chart_image;
@@ -939,6 +1009,7 @@ class ProductController extends Controller
         $product->meta_description  = $data['meta_description'];
         $product->meta_title        = $data['meta_title'];
         $product->meta_keywords     = $data['meta_keywords'];
+        $product->{'3d_active'}    = (int) ($data['3d_active'] ?? $product->{'3d_active'} ?? 0);
 
         $product->shopee_mrp        = (($data['shopee_mrp'] ?? '') !== '') ? (float) $data['shopee_mrp'] : null;
         $product->shopee_price      = (($data['shopee_price'] ?? '') !== '') ? (float) $data['shopee_price'] : null;
@@ -1227,6 +1298,9 @@ class ProductController extends Controller
         $metaImagePath      = $product->meta_image;
         $thumbnailImagePath = $product->thumbnail_image;
         $sizeImagePath      = $product->size_chart_image;
+        $frontViewPath      = $product->front_view;
+        $backViewPath       = $product->back_view;
+        $sideViewPath       = $product->side_view;
 
         Product::where('parent_id', $product->id)->delete();
         $product->delete();
@@ -1253,6 +1327,15 @@ class ProductController extends Controller
         }
         if (isset($sizeImagePath) && file_exists($sizeImagePath)) {
             unlink($sizeImagePath);
+        }
+        if (isset($frontViewPath) && file_exists($frontViewPath)) {
+            @unlink($frontViewPath);
+        }
+        if (isset($backViewPath) && file_exists($backViewPath)) {
+            @unlink($backViewPath);
+        }
+        if (isset($sideViewPath) && file_exists($sideViewPath)) {
+            @unlink($sideViewPath);
         }
 
         return response()->json(['ok' => true, 'msg' => 'product deleted']);
