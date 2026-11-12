@@ -16,6 +16,7 @@ use App\Models\backend\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Log;
 
 class ProductSyncController extends Controller
 {
@@ -33,50 +34,54 @@ class ProductSyncController extends Controller
         }
 
         $data = $request->validate([
-            'name'               => ['required', 'string', 'max:150'],
-            'sku'                => ['required', 'string', 'max:150'],
-            'slug'               => ['nullable', 'string', 'max:150'],
-            'barcode'            => ['nullable', 'string', 'max:150'],
-            'parent_id'          => ['nullable', 'integer'],
+            'name' => ['required', 'string', 'max:150'],
+            'sku' => ['required', 'string', 'max:150'],
+            'slug' => ['nullable', 'string', 'max:150'],
+            'barcode' => ['nullable', 'string', 'max:150'],
+            'parent_id' => ['nullable', 'integer'],
 
             'category_type_name' => ['nullable', 'string', 'max:150'],
-            'category_name'      => ['required', 'string', 'max:150'],
-            'subcategory_name'   => ['nullable', 'string', 'max:150'],
-            'product_type_name'  => ['nullable', 'string', 'max:150'],
-            'brand_name'         => ['required', 'string', 'max:150'],
-            'unit_name'          => ['nullable', 'string', 'max:150'],
-            'color_name'         => ['nullable', 'string', 'max:150'],
-            'size_name'          => ['nullable', 'string', 'max:150'],
-            'paper_name'         => ['nullable', 'string', 'max:150'],
+            'category_name' => ['required', 'string', 'max:150'],
+            'subcategory_name' => ['nullable', 'string', 'max:150'],
+            'product_type_name' => ['nullable', 'string', 'max:150'],
+            'brand_name' => ['required', 'string', 'max:150'],
+            'unit_name' => ['nullable', 'string', 'max:150'],
+            'color_name' => ['nullable', 'string', 'max:150'],
+            'size_name' => ['nullable', 'string', 'max:150'],
+            'paper_name' => ['nullable', 'string', 'max:150'],
 
-            'is_active'          => ['nullable', 'integer'],
-            'has_variant'        => ['nullable', 'integer'],
-            'material'           => ['nullable', 'string', 'max:150'],
-            'weight'             => ['nullable', 'numeric'],
-            'weight_gsm'         => ['nullable', 'numeric'],
-            'fabric_weave'       => ['nullable', 'string', 'max:150'],
-            'fabric_type'        => ['nullable', 'string', 'max:150'],
-            'origin_country'     => ['nullable', 'string', 'max:150'],
-            'care_instructions'  => ['nullable', 'string', 'max:250'],
-            'durability_rating'  => ['nullable', 'string', 'max:150'],
-            'transparency_text'  => ['nullable', 'string', 'max:150'],
-            'description'        => ['nullable', 'string', 'max:350'],
-            'short_description'  => ['nullable', 'string', 'max:250'],
-            'meta_title'         => ['nullable', 'string', 'max:150'],
-            'meta_description'   => ['nullable', 'string', 'max:350'],
-            'meta_keywords'      => ['nullable', 'string', 'max:250'],
+            'is_active' => ['nullable', 'integer'],
+            '3d_active' => ['nullable', 'integer'],
+            'has_variant' => ['nullable', 'integer'],
+            'material' => ['nullable', 'string', 'max:150'],
+            'weight' => ['nullable', 'numeric'],
+            'weight_gsm' => ['nullable', 'numeric'],
+            'fabric_weave' => ['nullable', 'string', 'max:150'],
+            'fabric_type' => ['nullable', 'string', 'max:150'],
+            'origin_country' => ['nullable', 'string', 'max:150'],
+            'care_instructions' => ['nullable', 'string', 'max:250'],
+            'durability_rating' => ['nullable', 'string', 'max:150'],
+            'transparency_text' => ['nullable', 'string', 'max:150'],
+            'description' => ['nullable', 'string', 'max:350'],
+            'short_description' => ['nullable', 'string', 'max:250'],
+            'meta_title' => ['nullable', 'string', 'max:150'],
+            'meta_description' => ['nullable', 'string', 'max:350'],
+            'meta_keywords' => ['nullable', 'string', 'max:250'],
 
-            'category_image'     => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'image'              => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'images'             => ['nullable', 'array'],
-            'images.*'           => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'thumbnail_image'    => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'size_chart_image'   => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'meta_image'         => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'category_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'thumbnail_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'front_view' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'back_view' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'side_view' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'size_chart_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'meta_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $categoryTypeId = $this->resolveOrCreate(CategoryType::class, $data['category_type_name'] ?? null, 'code');
-        $categoryId     = $this->resolveOrCreate(Category::class, $data['category_name'] ?? null, 'slug');
+        $categoryId = $this->resolveOrCreate(Category::class, $data['category_name'] ?? null, 'slug');
 
         if ($categoryId && $request->hasFile('category_image')) {
             $catImagePath = uploadImage($request->file('category_image'), 'category/icons');
@@ -85,19 +90,28 @@ class ProductSyncController extends Controller
 
         $subcategoryId = $this->resolveSubcategory($data['subcategory_name'] ?? null, $categoryId);
         $productTypeId = $this->resolveOrCreate(ProductType::class, $data['product_type_name'] ?? null, 'code');
-        $brandId       = $this->resolveOrCreate(Brand::class, $data['brand_name'] ?? null, 'slug');
-        $unitId        = $this->resolveOrCreate(Unit::class, $data['unit_name'] ?? null, 'code');
-        $colorId       = $this->resolveOrCreate(Color::class, $data['color_name'] ?? null, 'code');
-        $sizeId        = $this->resolveOrCreate(Size::class, $data['size_name'] ?? null, 'code');
-        $paperId       = $this->resolveOrCreate(PaperQuality::class, $data['paper_name'] ?? null, 'code');
+        $brandId = $this->resolveOrCreate(Brand::class, $data['brand_name'] ?? null, 'slug');
+        $unitId = $this->resolveOrCreate(Unit::class, $data['unit_name'] ?? null, 'code');
+        $colorId = $this->resolveOrCreate(Color::class, $data['color_name'] ?? null, 'code');
+        $sizeId = $this->resolveOrCreate(Size::class, $data['size_name'] ?? null, 'code');
+        $paperId = $this->resolveOrCreate(PaperQuality::class, $data['paper_name'] ?? null, 'code');
 
-        if (! $unitId) {
+        if (!$unitId) {
             $unitId = Unit::query()->value('id');
         }
 
-        $imagePaths    = $this->collectImages($request);
+        $imagePaths = $this->collectImages($request);
         $thumbnailPath = $request->hasFile('thumbnail_image')
             ? uploadImage($request->file('thumbnail_image'), 'product/thumbnail_images')
+            : null;
+        $frontViewPath = $request->hasFile('front_view')
+            ? uploadImage($request->file('front_view'), 'product/front_views')
+            : null;
+        $backViewPath = $request->hasFile('back_view')
+            ? uploadImage($request->file('back_view'), 'product/back_views')
+            : null;
+        $sideViewPath = $request->hasFile('side_view')
+            ? uploadImage($request->file('side_view'), 'product/side_views')
             : null;
         $sizeChartPath = $request->hasFile('size_chart_image')
             ? uploadImage($request->file('size_chart_image'), 'product/size_chart_images')
@@ -106,74 +120,62 @@ class ProductSyncController extends Controller
             ? uploadImage($request->file('meta_image'), 'product/meta_images')
             : null;
 
-        $product = DB::transaction(function () use (
-            $data,
-            $categoryTypeId,
-            $categoryId,
-            $subcategoryId,
-            $productTypeId,
-            $brandId,
-            $unitId,
-            $colorId,
-            $sizeId,
-            $paperId,
-            $imagePaths,
-            $thumbnailPath,
-            $sizeChartPath,
-            $metaImagePath
-        ) {
-            $payload = [
-                'name'              => ucwords($data['name']),
-                'slug'              => $data['slug'] ?? Str::slug($data['name'] . '-' . $data['sku']),
-                'sku'               => $data['sku'],
-                'barcode'           => $data['barcode'] ?? $data['sku'],
-                'parent_id'         => $data['parent_id'] ?? null,
-                'has_variants'      => (int) ($data['has_variant'] ?? 0),
-                'is_sellable'       => (int) (($data['has_variant'] ?? 0) ? 0 : 1),
+        $product = DB::transaction(function () use ($data, $categoryTypeId, $categoryId, $subcategoryId, $productTypeId, $brandId, $unitId, $colorId, $sizeId, $paperId, $imagePaths, $thumbnailPath, $sizeChartPath, $metaImagePath, $frontViewPath, $backViewPath, $sideViewPath) {
+            $payload = [ 
+                'name' => ucwords($data['name']),
+                'slug' => $data['slug'] ?? Str::slug($data['name'] . '-' . $data['sku']),
+                'sku' => $data['sku'],
+                'barcode' => $data['barcode'] ,
+                'parent_id' => $data['parent_id'] ?? null,
+                'has_variants' => (int) ($data['has_variant'] ?? 0),
+                'is_sellable' => (int) (($data['has_variant'] ?? 0) ? 0 : 1),
+                '3d_active' => (int) ($data['3d_active'] ?? 0),
+                'unit_id' => $unitId,
+                'brand_id' => $brandId,
+                'product_type_id' => $productTypeId,
+                'category_type_id' => $categoryTypeId,
+                'category_id' => $categoryId,
+                'subcategory_id' => $subcategoryId,
+                'color_id' => $colorId,
+                'size_id' => $sizeId,
+                'paper_id' => $paperId,
 
-                'unit_id'           => $unitId,
-                'brand_id'          => $brandId,
-                'product_type_id'   => $productTypeId,
-                'category_type_id'  => $categoryTypeId,
-                'category_id'       => $categoryId,
-                'subcategory_id'    => $subcategoryId,
-                'color_id'          => $colorId,
-                'size_id'           => $sizeId,
-                'paper_id'          => $paperId,
-
-                'track_stock'       => true,
-                'image'             => $imagePaths[0] ?? null,
-                'images'            => ! empty($imagePaths) ? json_encode($imagePaths) : null,
-                'thumbnail_image'   => $thumbnailPath,
-                'size_chart_image'  => $sizeChartPath,
-                'meta_image'        => $metaImagePath,
-                'material'          => $data['material'] ?? null,
-                'meta_title'        => $data['meta_title'] ?? null,
-                'meta_description'  => $data['meta_description'] ?? null,
-                'meta_keywords'     => $data['meta_keywords'] ?? null,
+                'track_stock' => true,
+                'image' => $imagePaths[0] ?? null,
+                'images' => !empty($imagePaths) ? json_encode($imagePaths) : null,
+                'thumbnail_image' => $thumbnailPath,
+                'front_view' => $frontViewPath,
+                'back_view' => $backViewPath,
+                'side_view' => $sideViewPath,
+                'size_chart_image' => $sizeChartPath,
+                'meta_image' => $metaImagePath,
+                'material' => $data['material'] ?? null,
+                'meta_title' => $data['meta_title'] ?? null,
+                'meta_description' => $data['meta_description'] ?? null,
+                'meta_keywords' => $data['meta_keywords'] ?? null,
                 'short_description' => $data['short_description'] ?? null,
-                'description'       => $data['description'] ?? null,
+                'description' => $data['description'] ?? null,
             ];
 
             if ($data['has_variant'] ?? 0) {
                 $payload['is_sellable'] = 0;
             }
 
-            $product = Product::firstOrNew(['sku' => $data['sku']]);
-
+            $product = Product::firstOrNew(['barcode' => $data['barcode']]);
+            Log::info('Product Sync Payload: ' . json_encode($payload));
             // DK controls these commercial fields after the first sync. Keep the
             // local values intact when Smart later updates the same SKU.
-            if (! $product->exists) {
+            if (!$product->exists) {
                 $payload = array_merge($payload, [
-                    'price'          => 0,
-                    'cost_price'     => null,
-                    'mrp'            => null,
-                    'discount_type'  => null,
+                    'price' => 0,
+                    'cost_price' => null,
+                    'mrp' => null,
+                    'discount_type' => null,
                     'discount_value' => null,
-                    'is_active'      => 0,
+                    'is_active' => 0,
                 ]);
             }
-
+    
             $product->fill($payload);
             $product->save();
 
@@ -181,11 +183,11 @@ class ProductSyncController extends Controller
                 'product_id' => $product->id,
             ]);
 
-            $specification->material          = $data['material'] ?? null;
-            $specification->weight_gsm        = $data['weight_gsm'] ?? $data['weight'] ?? null;
-            $specification->fabric_weave      = $data['fabric_weave'] ?? null;
-            $specification->fabric_type       = $data['fabric_type'] ?? null;
-            $specification->origin_country    = $data['origin_country'] ?? null;
+            $specification->material = $data['material'] ?? null;
+            $specification->weight_gsm = $data['weight_gsm'] ?? $data['weight'] ?? null;
+            $specification->fabric_weave = $data['fabric_weave'] ?? null;
+            $specification->fabric_type = $data['fabric_type'] ?? null;
+            $specification->origin_country = $data['origin_country'] ?? null;
             $specification->care_instructions = $data['care_instructions'] ?? null;
             $specification->durability_rating = $data['durability_rating'] ?? null;
             $specification->transparency_text = $data['transparency_text'] ?? null;
@@ -201,7 +203,7 @@ class ProductSyncController extends Controller
             'message' => $product->wasRecentlyCreated
                 ? 'Product synced successfully'
                 : 'Product sync updated successfully',
-            'data'    => $product,
+            'data' => $product,
         ], $product->wasRecentlyCreated ? 201 : 200);
     }
 
@@ -250,8 +252,8 @@ class ProductSyncController extends Controller
         }
 
         $record = Subcategory::create([
-            'name'        => $name,
-            'slug'        => $this->uniqueSlug(Subcategory::class, $name),
+            'name' => $name,
+            'slug' => $this->uniqueSlug(Subcategory::class, $name),
             'category_id' => $categoryId,
         ]);
 
@@ -283,7 +285,7 @@ class ProductSyncController extends Controller
     {
         $base = Str::slug($name);
         $slug = $base;
-        $i    = 1;
+        $i = 1;
 
         while ($modelClass::where('slug', $slug)->exists()) {
             $slug = $base . '-' . $i;
@@ -297,7 +299,7 @@ class ProductSyncController extends Controller
     {
         $base = Str::upper(Str::slug($name, '_'));
         $code = $base;
-        $i    = 1;
+        $i = 1;
 
         while ($modelClass::where('code', $code)->exists()) {
             $code = $base . '_' . $i;

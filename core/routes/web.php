@@ -50,6 +50,10 @@ use App\Http\Controllers\backend\PurchaseReportController;
 use App\Http\Controllers\backend\ExpenseReportController;
 use App\Http\Controllers\backend\OfferController;
 use App\Http\Controllers\backend\ReportModuleController;
+use App\Http\Controllers\backend\EmployeeController;
+use App\Http\Controllers\backend\EmployeeLedgerController;
+use App\Http\Controllers\backend\EmployeeSalaryController;
+use App\Http\Controllers\backend\EmployeeSalaryPaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth', 'perm', 'branchscope'])->group(function () {
@@ -734,5 +738,38 @@ Route::middleware(['web', 'auth', 'perm', 'branchscope'])->group(function () {
         Route::post('/status', [OfferController::class, 'updateStatus'])->name('updateStatus');
         Route::post('/ajax-datatable', [OfferController::class, 'ajaxIndex'])->name('ajax');
     });
+
+ // Employee Management Module routes
+    Route::prefix('employee')->name('employee.')->group(function () {
+        Route::get('employees', [EmployeeController::class, 'index'])->name('employees.index');
+        Route::get('employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+        Route::post('employees', [EmployeeController::class, 'store'])->name('employees.store');
+        Route::post('employees/list', [EmployeeController::class, 'listAjax'])->name('employees.list.ajax');
+        Route::get('employees/{employee}/edit', [EmployeeController::class, 'edit'])->whereNumber('employee')->name('employees.edit');
+        Route::post('employees/{employee}', [EmployeeController::class, 'update'])->whereNumber('employee')->name('employees.update');
+        Route::delete('employees/{employee}', [EmployeeController::class, 'destroy'])->whereNumber('employee')->name('employees.destroy');
+
+        Route::prefix('salaries')->name('salaries.')->group(function () {
+            Route::get('/', [EmployeeSalaryController::class, 'index'])->name('index');
+            Route::post('list', [EmployeeSalaryController::class, 'listAjax'])->name('list');
+            Route::get('create/modal', [EmployeeSalaryController::class, 'createModal'])->name('create.modal');
+            Route::post('/', [EmployeeSalaryController::class, 'store'])->name('store');
+            Route::delete('{salary}', [EmployeeSalaryController::class, 'destroy'])->whereNumber('salary')->name('destroy');
+        });
+
+        Route::prefix('salary-payments')->name('salary-payments.')->group(function () {
+            Route::get('/', [EmployeeSalaryPaymentController::class, 'index'])->name('index');
+            Route::post('list', [EmployeeSalaryPaymentController::class, 'listAjax'])->name('list');
+            Route::get('create/modal', [EmployeeSalaryPaymentController::class, 'createModal'])->name('create.modal');
+            Route::post('/', [EmployeeSalaryPaymentController::class, 'store'])->name('store');
+            Route::delete('{salary_payment}', [EmployeeSalaryPaymentController::class, 'destroy'])->whereNumber('salary_payment')->name('destroy');
+        });
+
+        Route::prefix('ledger')->name('ledger.')->group(function () {
+            Route::get('/', [EmployeeLedgerController::class, 'index'])->name('index');
+            Route::post('list', [EmployeeLedgerController::class, 'listAjax'])->name('list');
+        });
+    });
+
 
 });
