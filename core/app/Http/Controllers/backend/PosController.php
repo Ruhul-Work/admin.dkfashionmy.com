@@ -116,7 +116,7 @@ class PosController extends Controller
 
         $dueAmount = round($calculatedTotal - $paidAmount, 2);
 
-        if ($paidAmount <= 0) {
+        if ($paidAmount <= 0 && $paidAmount < $calculatedTotal) {
             $paymentStatus = 'due';
         } elseif ($paidAmount < $calculatedTotal) {
             $paymentStatus = 'partial';
@@ -238,12 +238,20 @@ class PosController extends Controller
                 | 📦 ITEMS
                 -----------------------------*/
                 foreach ($data['items'] as $item) {
+                    $discount = 0;
+                    // dd($data['discount'], $calculatedTotal, $item['unit_price']);
+                    if($calculatedTotal==0){
+                        $discount = $item['unit_price'];
+                    }
                     SaleItem::create([
                         'sale_id'    => $sale->id,
                         'product_id' => $item['product_id'],
+                        'name'       => Product::find($item['product_id'])->name,
                         'quantity'   => $item['quantity'],
                         'unit_price' => $item['unit_price'],
-                        'line_total' => round($item['quantity'] * $item['unit_price'], 2),
+                        'discount_amount'   => $discount ?? 0,
+                        'item_type'  => ($calculatedTotal==0 ? 'gift' : 'regular'),
+                        'line_total' => round(($item['quantity'] * $item['unit_price']) - ($item['quantity'] * $discount), 2),
                     ]);
                 }
 

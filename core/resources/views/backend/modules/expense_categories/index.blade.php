@@ -76,7 +76,7 @@
   <script>
     var DATATABLE_URL = "{{ route('expenseCategories.list.ajax') }}";
 
-    window.CategoryIndex = {
+    window.branchIndex = {
     onSaved: function (res) {
       // DataTable current page reload
       $('.AjaxDataTable').DataTable().ajax.reload(null, false);

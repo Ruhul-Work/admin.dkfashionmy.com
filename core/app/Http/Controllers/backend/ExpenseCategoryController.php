@@ -68,8 +68,8 @@ class ExpenseCategoryController extends Controller
                     bg-success-focus text-success-main AjaxModal"
                     data-ajax-modal="' . route('expenseCategories.edit', $b->id) . '"
                     data-size="lg"
-                    data-onload="PaymentTypeIndex.onLoad"
-                    data-onsuccess="PaymentTypeIndex.onSaved"
+                    data-onload="branchIndex.onLoad"
+                    data-onsuccess="branchIndex.onSaved"
                     title="Edit">
                     <iconify-icon icon="lucide:edit"></iconify-icon>
                 </a>

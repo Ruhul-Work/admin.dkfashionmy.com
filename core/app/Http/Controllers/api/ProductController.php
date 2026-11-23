@@ -9,6 +9,7 @@ use App\Models\backend\Category;
 use App\Models\backend\OfferDiscount;
 use App\Models\backend\OfferGift;
 use App\Models\backend\Product;
+use App\Models\backend\StockCurrent;
 use App\Models\backend\Subcategory;
 use Illuminate\Http\Request;
 
@@ -119,10 +120,6 @@ class ProductController extends Controller
         return response()->json(['success' => true, 'data' => new ProductDetailResource($product)]);
     }
 
-
-
-
-
     public function threeDActive()
     {
         $products = Product::with('category')
@@ -133,5 +130,29 @@ class ProductController extends Controller
             ->get();
 
         return response()->json(['success' => true, 'data' => ProductResource::collection($products)]);
+    }
+
+    public function currentStock(Request $request, $slug)
+    {
+        $product = Product::where('slug', $slug)->first();
+
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'Product not found'], 404);
+        }
+
+        $query = StockCurrent::where('product_id', $product->id);
+
+        if ($request->branch_id) {
+            $query->where('branch_id', $request->branch_id);
+
+            if ($request->warehouse_id) {
+                $query->where('warehouse_id', $request->warehouse_id);
+            }
+        }
+
+        $stock = $query->sum('quantity');
+
+
+        return response()->json(['success' => true, 'data' => ['current_stock' => $stock, 'product_id' => $product->slug]]);
     }
 }

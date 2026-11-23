@@ -10,20 +10,10 @@ class SaleItem extends Model
 {
     protected $table = 'sale_items';
 
-    protected $fillable = [
-        'sale_id',
-        'product_id',
-        'name',
-        'image',
-        'product_variant_id',
-        'unit_id',
-        'quantity',
-        'unit_price',
-        'discount_amount',
-        'tax_amount',
-        'line_total',
-        'lot_number',
-        'expiry_date',
+    protected $guarded = [
+       'id',
+       'created_at',
+       'updated_at',
     ];
 
     /* ================= Relations ================= */

@@ -3,8 +3,8 @@
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 
-<div class="modal-body p-24" id="categoryCreateModal">
-  <form id="categoryCreateForm"
+<div class="modal-body p-24" id="branchCreateModal">
+  <form id="branchCreateForm"
         action="{{ route('expenseCategories.store') }}"
         method="post"
         data-ajax="true"
